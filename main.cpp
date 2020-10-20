@@ -5,12 +5,16 @@
 #include <sstream>
 #include <fstream>
 
+
 struct Metadata {
     std::string inputFile;
     std::string outputFile;
     std::vector<size_t> columnNumbers;
     std::vector<std::vector<std::string>> table;
+    static size_t currCompareColumn;
+    static bool compareRows(std::vector<std::string> row1, std::vector<std::string> row2);
 };
+size_t Metadata::currCompareColumn = 0;
 
 void exitProgram(int exitCode, const std::string& message){
     std::cerr << message << "\n";
@@ -56,7 +60,7 @@ std::vector<std::string> parseRow(std::string& row){
     return result;
 }
 
-void readData(int argc, char* argv[]){
+Metadata readData(int argc, char* argv[]){
     if (argc != 4){
         std::cerr << "Invalid arguments" << "\n";
         exit(1);
@@ -81,16 +85,37 @@ void readData(int argc, char* argv[]){
     }
     if (metadata.table[0].empty())
         exitProgram(1,"Invalid input data form.");
-    for (auto & i : metadata.table) {
-        for (auto & j : i) {
-            std::cout << j << " ";
+    return metadata;
+}
+
+bool Metadata::compareRows(std::vector<std::string> row1, std::vector<std::string> row2){
+    return (row1[currCompareColumn] < row2[currCompareColumn]);
+}
+
+void sortData(Metadata& metadata){
+    for (auto it = metadata.columnNumbers.rbegin(); it != metadata.columnNumbers.rend(); ++it){
+        Metadata::currCompareColumn = *it - 1;
+        std::stable_sort(metadata.table.begin(),metadata.table.end(),metadata.compareRows);
+    }
+}
+
+void writeData(Metadata& metadata){
+    std::ofstream output(metadata.outputFile);
+    for (auto & row : metadata.table){
+        for (int j = 0; j < row.size(); j++){
+            output << row[j];
+            if (j+1 == row.size())
+                output << "\n";
+            else
+                output << ",";
         }
-        std::cout << "\n";
     }
 }
 
 
 int main(int argc, char* argv[]) {
-    readData(argc,argv);
+    Metadata metadata = readData(argc,argv);
+    sortData(metadata);
+    writeData(metadata);
     return 0;
 }

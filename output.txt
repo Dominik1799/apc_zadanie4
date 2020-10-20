@@ -1,0 +1,5 @@
+1,a,a,aa,
+2,b,a,aa,a
+4,a,a,aa,b
+3,a,b,aa,b
+5,a,b,aa,b
