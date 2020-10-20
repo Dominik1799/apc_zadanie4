@@ -1,4 +1,6 @@
 3 argumenty (vstup vystup stringPoziciiStlpcov)
 treti argument musi byt vo validnej forme
     napr.: 1,2,5,8
-    neplatne : 01,2,4  |  3,a,1  | 2,3,
+    neplatne : 01,2,4  |  3,a,1  | 2,3,  |  1,2,2,3
+
+vo vstupe treba aby mal kazdy riadok rovnaky pocet stlpcov
