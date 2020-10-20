@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <sstream>
 #include <fstream>
 
 struct Metadata {
@@ -46,7 +47,12 @@ void parseColumnNumbers(std::string& rawColumns,std::vector<size_t>& columns){
 }
 
 std::vector<std::string> parseRow(std::string& row){
+    std::stringstream lineStream(row);
     std::vector<std::string> result;
+    std::string buffer;
+    while (std::getline(lineStream,buffer,',')){
+        result.push_back(buffer);
+    }
     return result;
 }
 
@@ -62,10 +68,25 @@ void readData(int argc, char* argv[]){
     parseColumnNumbers(str,metadata.columnNumbers);
     std::ifstream input(metadata.inputFile);
     std::string buffer;
+    size_t prevSize = 0;
     while (std::getline(input,buffer)){
-        std::cout << buffer;
+        if (buffer.back() == ',')
+            buffer.append(",");
+        std::vector<std::string> vec = parseRow(buffer);
+        if (prevSize != vec.size() && prevSize != 0){
+            exitProgram(1,"Invalid input data form.");
+        }
+        prevSize = vec.size();
+        metadata.table.push_back(vec);
     }
-
+    if (metadata.table[0].empty())
+        exitProgram(1,"Invalid input data form.");
+    for (auto & i : metadata.table) {
+        for (auto & j : i) {
+            std::cout << j << " ";
+        }
+        std::cout << "\n";
+    }
 }
 
 
