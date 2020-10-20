@@ -32,7 +32,7 @@ void parseColumnNumbers(std::string& rawColumns,std::vector<size_t>& columns){
             if (!wasNumber || i == rawColumns.size()-1)
                 exitProgram(1,"3rd argument has invalid format.");
             std::string subst = rawColumns.substr(begin,i-begin);
-            num = std::stoll(subst);
+            num = std::stoul(subst);
             if (std::find(columns.begin(),columns.end(),num) != columns.end()){
                 exitProgram(1,"3rd argument has invalid format: Duplicates.");
             }
@@ -43,7 +43,7 @@ void parseColumnNumbers(std::string& rawColumns,std::vector<size_t>& columns){
         }
     }
     std::string subst = rawColumns.substr(begin);
-    num = std::stoll(subst);
+    num = std::stoul(subst);
     if (std::find(columns.begin(),columns.end(),num) != columns.end()){
         exitProgram(1,"3rd argument has invalid format: Duplicates.");
     }
@@ -78,13 +78,13 @@ Metadata readData(int argc, char* argv[]){
             buffer.append(",");
         std::vector<std::string> vec = parseRow(buffer);
         if (prevSize != vec.size() && prevSize != 0){
-            exitProgram(1,"Invalid input data form.");
+            exitProgram(1,"Invalid input data format.");
         }
         prevSize = vec.size();
         metadata.table.push_back(vec);
     }
-    if (metadata.table[0].empty())
-        exitProgram(1,"Invalid input data form.");
+    if (!input.eof() || input.bad() || metadata.table.empty() || metadata.table[0].empty())
+        exitProgram(1,"Invalid input data format.");
     return metadata;
 }
 
@@ -102,7 +102,7 @@ void sortData(Metadata& metadata){
 void writeData(Metadata& metadata){
     std::ofstream output(metadata.outputFile);
     for (auto & row : metadata.table){
-        for (int j = 0; j < row.size(); j++){
+        for (size_t j = 0; j < row.size(); j++){
             output << row[j];
             if (j+1 == row.size())
                 output << "\n";
@@ -110,6 +110,8 @@ void writeData(Metadata& metadata){
                 output << ",";
         }
     }
+    if (output.fail())
+        exitProgram(1,"Error while writing data.");
 }
 
 
